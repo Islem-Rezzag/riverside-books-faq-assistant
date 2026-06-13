@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "question": "What are your opening hours?",
+    "answer": "We're open 9am to 6pm Monday to Saturday, and 11am to 4pm on Sundays."
+  },
+  {
+    "id": 2,
+    "question": "Where are you located?",
+    "answer": "We're at 42 Mill Lane, Riverside, RV1 2AB."
+  },
+  {
+    "id": 3,
+    "question": "Do you offer gift wrapping?",
+    "answer": "Yes, we offer free gift wrapping on all purchases — just ask at the till."
+  },
+  {
+    "id": 4,
+    "question": "Can I order a book that's not in stock?",
+    "answer": "Absolutely. We can order most titles and they usually arrive within 3 to 5 working days."
+  },
+  {
+    "id": 5,
+    "question": "Do you buy second-hand books?",
+    "answer": "We do. Bring them in and a member of staff will give you a quote in store."
+  },
+  {
+    "id": 6,
+    "question": "Do you host events?",
+    "answer": "Yes, we run author readings and a monthly book club. Check our noticeboard for dates."
+  },
+  {
+    "id": 7,
+    "question": "Is there parking nearby?",
+    "answer": "There's a public car park on Mill Lane, a two-minute walk from the shop."
+  },
+  {
+    "id": 8,
+    "question": "Do you have a loyalty scheme?",
+    "answer": "Yes — collect a stamp per purchase and get a free book after ten stamps."
+  },
+  {
+    "id": 9,
+    "question": "Do you sell gift vouchers?",
+    "answer": "We do. Gift vouchers are available in any amount and can be used in store or online."
+  },
+  {
+    "id": 10,
+    "question": "What payment methods do you accept?",
+    "answer": "We accept cash, all major debit and credit cards, and contactless payments."
+  },
+  {
+    "id": 11,
+    "question": "Do you have a website where I can buy books?",
+    "answer": "Yes — you can browse and order from our website, with delivery or click-and-collect."
+  },
+  {
+    "id": 12,
+    "question": "Do you offer click and collect?",
+    "answer": "We do. Order online and collect from the shop, usually ready the same day."
+  },
+  {
+    "id": 13,
+    "question": "Can I return a book?",
+    "answer": "Yes, you can return unread books within 30 days with your receipt for a full refund."
+  },
+  {
+    "id": 14,
+    "question": "Do you have a children's section?",
+    "answer": "We have a dedicated children's corner with picture books, fiction, and a reading nook."
+  },
+  {
+    "id": 15,
+    "question": "Can you recommend a book?",
+    "answer": "Of course — our staff love giving recommendations, so just ask anyone in store."
+  },
+  {
+    "id": 16,
+    "question": "Do you have a café?",
+    "answer": "Yes, our small café at the back serves coffee, tea, and cakes while you browse."
+  },
+  {
+    "id": 17,
+    "question": "Is the shop wheelchair accessible?",
+    "answer": "Yes, the shop has step-free access and an accessible toilet."
+  },
+  {
+    "id": 18,
+    "question": "Do you sell e-books or audiobooks?",
+    "answer": "We sell audiobooks on CD in store, and e-books and digital audiobooks via our website."
+  },
+  {
+    "id": 19,
+    "question": "Can I reserve a book?",
+    "answer": "Yes — call us or pop in and we'll hold a book at the till for up to three days."
+  },
+  {
+    "id": 20,
+    "question": "Do you offer student discounts?",
+    "answer": "We offer 10% off for students with a valid student ID on all full-price books."
+  }
+]
