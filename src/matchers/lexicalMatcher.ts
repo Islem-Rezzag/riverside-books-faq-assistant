@@ -29,7 +29,14 @@ const FAQ_ALIASES_BY_ID: Record<number, string> = {
 
 interface LexicalDocument {
   faq: FAQ;
-  tokens: string[];
+  questionTokens: LexicalTokens;
+  aliasTokens: LexicalTokens;
+  expandedAnswerTokens: string[];
+}
+
+interface LexicalTokens {
+  raw: string[];
+  expanded: string[];
 }
 
 interface LexicalMatcherOptions {
@@ -43,21 +50,47 @@ export function buildFaqSearchText(faq: FAQ): string {
     .trim();
 }
 
+function buildLexicalTokens(text: string): LexicalTokens {
+  const raw = tokenize(text);
+
+  return {
+    raw,
+    expanded: expandTokens(raw),
+  };
+}
+
+function scoreLexicalText(query: LexicalTokens, document: LexicalTokens): number {
+  return (
+    tokenOverlapScore(query.raw, document.raw) * 0.6 +
+    tokenOverlapScore(query.expanded, document.expanded) * 0.4
+  );
+}
+
+function scoreDocument(query: LexicalTokens, document: LexicalDocument): number {
+  return (
+    scoreLexicalText(query, document.questionTokens) * 0.4 +
+    scoreLexicalText(query, document.aliasTokens) * 0.45 +
+    tokenOverlapScore(query.expanded, document.expandedAnswerTokens) * 0.15
+  );
+}
+
 export function createLexicalMatcher(
   faqs: FAQ[],
   options: LexicalMatcherOptions,
 ): Matcher {
   const documents: LexicalDocument[] = faqs.map((faq) => ({
     faq,
-    tokens: expandTokens(tokenize(buildFaqSearchText(faq))),
+    questionTokens: buildLexicalTokens(faq.question),
+    aliasTokens: buildLexicalTokens(FAQ_ALIASES_BY_ID[faq.id] ?? ""),
+    expandedAnswerTokens: expandTokens(tokenize(faq.answer)),
   }));
 
   return {
     name: "lexical",
     async match(question: string): Promise<MatchResult> {
-      const queryTokens = expandTokens(tokenize(question));
+      const query = buildLexicalTokens(question);
 
-      if (queryTokens.length === 0) {
+      if (query.expanded.length === 0) {
         return {
           faq: null,
           score: 0,
@@ -70,7 +103,7 @@ export function createLexicalMatcher(
       const candidates = documents
         .map<MatchCandidate>((document) => ({
           faq: document.faq,
-          score: tokenOverlapScore(queryTokens, document.tokens),
+          score: scoreDocument(query, document),
         }))
         .sort((a, b) => b.score - a.score);
 

@@ -48,16 +48,24 @@ const STOPWORDS = new Set([
 
 const SYNONYM_MAP = new Map<string, string[]>([
   ["open", ["hours", "opening", "visit", "come"]],
+  ["opening", ["open", "hours", "times"]],
   ["hours", ["open", "opening", "times"]],
+  ["come", ["visit", "open"]],
   ["visit", ["open", "come", "shop"]],
   ["location", ["address", "where", "find"]],
+  ["address", ["location", "where", "find"]],
   ["shop", ["store", "bookshop"]],
-  ["gift", ["present", "voucher", "wrapping"]],
-  ["present", ["gift", "wrapping"]],
+  ["store", ["shop", "bookshop"]],
+  ["wrap", ["wrapping", "present"]],
+  ["wrapping", ["wrap", "present"]],
+  ["present", ["wrap", "wrapping"]],
+  ["voucher", ["gift", "card"]],
+  ["vouchers", ["voucher", "gift", "card"]],
   ["refund", ["return", "exchange"]],
   ["return", ["refund", "bring", "back"]],
   ["parking", ["park", "car"]],
   ["park", ["parking", "car"]],
+  ["car", ["parking", "park"]],
   ["student", ["discount"]],
   ["discount", ["student"]],
   ["children", ["kids", "child"]],
@@ -67,7 +75,12 @@ const SYNONYM_MAP = new Map<string, string[]>([
   ["ebook", ["digital", "audiobook"]],
   ["audiobook", ["digital", "ebook"]],
   ["reserve", ["hold"]],
-  ["payment", ["cash", "card", "contactless"]],
+  ["payment", ["pay", "accept", "take", "cash", "card", "contactless"]],
+  ["pay", ["payment", "accept", "take", "cash", "card", "contactless"]],
+  ["accept", ["payment", "pay", "take"]],
+  ["take", ["payment", "pay", "accept"]],
+  ["cash", ["payment", "pay", "contactless"]],
+  ["contactless", ["payment", "pay", "card"]],
   ["order", ["buy", "purchase"]],
   ["buy", ["order", "purchase"]],
   ["website", ["online"]],
@@ -82,10 +95,6 @@ function buildExpandedSynonymMap(): Map<string, Set<string>> {
 
   for (const [token, synonyms] of SYNONYM_MAP.entries()) {
     addSynonyms(expanded, token, synonyms);
-
-    for (const synonym of synonyms) {
-      addSynonyms(expanded, synonym, [token]);
-    }
   }
 
   return expanded;
