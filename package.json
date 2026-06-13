@@ -1,0 +1,25 @@
+{
+  "name": "riverside-books-faq-assistant",
+  "version": "1.0.0",
+  "description": "Command-line FAQ chatbot for the Riverside Books technical task.",
+  "type": "module",
+  "main": "dist/src/cli.js",
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "start": "node dist/src/cli.js",
+    "test": "vitest run"
+  },
+  "author": "Mohamed Islem Rezzag Baara",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "openai": "^6.42.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  }
+}
