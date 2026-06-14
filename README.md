@@ -73,6 +73,29 @@ Run the eval set with an API key configured:
 npm run eval
 ```
 
+## Optional Web UI Demo
+
+The required solution is the CLI. There is also a small optional local web demo
+for presentation:
+
+```bash
+npm run ui:dev
+```
+
+Then open `http://localhost:5173`.
+
+The UI uses a local Node server and calls `POST /api/ask`. The browser never
+calls OpenAI directly and never receives `OPENAI_API_KEY`; routing stays
+server-side and the final answer still comes from `faqs.json`.
+
+You can also run the UI build check:
+
+```bash
+npm run ui:build
+```
+
+Eval results can vary slightly because the router uses an LLM.
+
 ## Matching Approach
 
 The app uses an LLM router only:

@@ -14,6 +14,17 @@ The app is now an LLM-router CLI:
 There is no lexical matcher, embedding matcher, vector store, UI, or generated
 answer path.
 
+## Optional UI Demo
+
+The optional browser demo is static HTML, CSS, and JavaScript served by
+`src/webServer.ts`.
+
+- `GET /` serves `web/index.html`.
+- `GET /styles.css` and `GET /app.js` serve static assets.
+- `POST /api/ask` sends the question to the server-side LLM router.
+- The browser receives only the structured route result and official FAQ answer.
+- No OpenAI API key is referenced or exposed in client-side code.
+
 ## Structured Output
 
 The router asks the model for:

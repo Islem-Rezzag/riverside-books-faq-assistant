@@ -10,7 +10,9 @@
     "start": "node dist/src/cli.js",
     "test": "vitest run",
     "eval": "tsx src/eval.ts",
-    "eval:validate": "tsx src/eval.ts --validate-only"
+    "eval:validate": "tsx src/eval.ts --validate-only",
+    "ui:dev": "tsx src/webServer.ts",
+    "ui:build": "npm run build"
   },
   "author": "Mohamed Islem Rezzag Baara",
   "license": "ISC",
