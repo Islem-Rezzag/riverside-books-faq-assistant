@@ -134,6 +134,7 @@ button {
   display: grid;
   grid-template-rows: auto minmax(420px, 1fr) auto;
   gap: 24px;
+  min-height: 0;
 }
 
 .hero {
@@ -185,6 +186,7 @@ button {
   display: grid;
   grid-template-rows: 1fr auto auto;
   min-height: 420px;
+  max-height: min(58vh, 640px);
   overflow: hidden;
 }
 
@@ -195,7 +197,28 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  overflow: auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(16, 38, 63, 0.36) transparent;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.message-log::-webkit-scrollbar {
+  width: 10px;
+}
+
+.message-log::-webkit-scrollbar-thumb {
+  background: rgba(16, 38, 63, 0.26);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+
+.message-log::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 38, 63, 0.38);
+  background-clip: content-box;
 }
 
 .message {
@@ -402,9 +425,82 @@ button {
   }
 }
 
+@media (min-width: 1121px) {
+  .app-shell {
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .sidebar,
+  .detail-panel {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .main-panel {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    overflow: hidden;
+  }
+
+  .chat-card {
+    min-height: 0;
+    max-height: none;
+  }
+}
+
+@media (min-width: 1121px) and (max-height: 819px) {
+  .main-panel {
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .hero {
+    align-items: center;
+  }
+
+  .hero h2 {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+  }
+
+  .hero p:last-child {
+    margin-top: 8px;
+    font-size: 0.98rem;
+  }
+
+  .architecture-badge {
+    padding: 8px 12px;
+  }
+
+  .message-log {
+    padding: 18px;
+  }
+
+  .question-form {
+    padding: 14px;
+  }
+
+  .question-form input {
+    padding: 11px 12px;
+  }
+
+  .form-hint {
+    padding: 0 14px 14px;
+  }
+
+  .faq-card,
+  .detail-card {
+    padding: 16px;
+  }
+}
+
 @media (max-width: 1120px) {
   .app-shell {
     grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .message-log {
+    max-height: min(52vh, 520px);
   }
 
   .detail-panel {
@@ -438,6 +534,11 @@ button {
   .detail-panel {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .message-log {
+    max-height: 46vh;
+    padding: 18px;
   }
 
   .question-form {
