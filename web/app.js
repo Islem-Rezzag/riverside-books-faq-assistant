@@ -11,6 +11,7 @@ const modelValue = document.querySelector("#modelValue");
 const sourceValue = document.querySelector("#sourceValue");
 const reasonText = document.querySelector("#reasonText");
 const exampleButtons = document.querySelectorAll(".example-button");
+const EMPTY_VALUE = "\u2014";
 
 function appendMessage(role, text) {
   const message = document.createElement("div");
@@ -60,11 +61,11 @@ function setStatusBadge(status) {
 
 function renderDetails(data) {
   setStatusBadge(data.status);
-  faqIdValue.textContent = data.faqId === null ? "None" : `FAQ ${data.faqId}`;
+  faqIdValue.textContent = data.faqId === null ? EMPTY_VALUE : `FAQ ${data.faqId}`;
   confidenceValue.textContent =
-    typeof data.confidence === "number" ? data.confidence.toFixed(2) : "None";
-  modelValue.textContent = data.model || "None";
-  sourceValue.textContent = data.source || "None";
+    typeof data.confidence === "number" ? data.confidence.toFixed(2) : EMPTY_VALUE;
+  modelValue.textContent = data.model || EMPTY_VALUE;
+  sourceValue.textContent = data.source && data.source !== "None" ? data.source : EMPTY_VALUE;
   reasonText.textContent = data.reason || "No routing reason returned.";
 
   if (data.status === "success") {
@@ -101,7 +102,7 @@ function renderNetworkError() {
     faqAnswer: null,
     confidence: null,
     reason: "network or server error",
-    model: "None",
+    model: "",
     source: "None",
   };
 

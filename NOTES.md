@@ -6,7 +6,8 @@ The app is now an LLM-router CLI:
 
 1. `src/cli.ts` loads config and FAQ data, then runs the terminal loop.
 2. `src/llmRouter.ts` calls OpenAI Chat Completions with structured JSON output.
-3. `src/routerValidation.ts` validates the router decision against `faqs.json`.
+3. `src/routerValidation.ts` validates the router decision against official FAQ
+   content.
 4. `src/responsePolicy.ts` owns the no-match, setup, and technical issue
    messages.
 5. `src/eval.ts` validates or runs the labelled evaluation set.
@@ -14,15 +15,15 @@ The app is now an LLM-router CLI:
 There is no lexical matcher, embedding matcher, vector store, UI, or generated
 answer path.
 
-## Optional UI Demo
+## Web UI Demo
 
-The optional browser demo is static HTML, CSS, and JavaScript served by
-`src/webServer.ts`.
+The Web UI Demo is static HTML, CSS, and JavaScript served by `src/webServer.ts`.
 
 - `GET /` serves `web/index.html`.
 - `GET /styles.css` and `GET /app.js` serve static assets.
 - `POST /api/ask` sends the question to the server-side LLM router.
 - The browser receives only the structured route result and official FAQ answer.
+- Routing stays on the server-side LLM router.
 - No OpenAI API key is referenced or exposed in client-side code.
 
 ## Structured Output
@@ -58,7 +59,7 @@ no-match output becomes a no-match response.
 
 The CLI prints one of three response types:
 
-- Approved FAQ answer from `faqs.json`.
+- Approved official FAQ answer.
 - No-match fallback when the question cannot be safely answered.
 - Technical issue message when the router or setup fails.
 

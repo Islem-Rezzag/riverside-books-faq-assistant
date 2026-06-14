@@ -32,18 +32,18 @@
         </section>
 
         <p class="safety-note">
-          The LLM routes the question. The answer comes from faqs.json.
+          The LLM routes the question. The answer comes from official FAQ content.
         </p>
       </aside>
 
       <main class="main-panel">
         <header class="hero">
           <div>
-            <p class="eyebrow">Optional web demo</p>
+            <p class="eyebrow">Web UI Demo</p>
             <h2>Riverside Books FAQ Assistant</h2>
             <p>Grounded answers from official FAQ content</p>
           </div>
-          <span class="architecture-badge">LLM router -> validation -> official FAQ answer</span>
+          <span class="architecture-badge">LLM Router | Validation | Official FAQ Answer</span>
         </header>
 
         <section class="chat-card" aria-label="FAQ chat">
@@ -85,19 +85,19 @@
             </div>
             <div>
               <dt>FAQ ID</dt>
-              <dd id="faqIdValue">None</dd>
+              <dd id="faqIdValue">&mdash;</dd>
             </div>
             <div>
               <dt>Confidence</dt>
-              <dd id="confidenceValue">None</dd>
+              <dd id="confidenceValue">&mdash;</dd>
             </div>
             <div>
               <dt>Model</dt>
-              <dd id="modelValue">None</dd>
+              <dd id="modelValue">&mdash;</dd>
             </div>
             <div>
               <dt>Source</dt>
-              <dd id="sourceValue">None</dd>
+              <dd id="sourceValue">&mdash;</dd>
             </div>
           </dl>
         </section>
@@ -113,7 +113,7 @@
             <li>User asks a question.</li>
             <li>The LLM chooses a FAQ ID or no match.</li>
             <li>The app validates the structured decision.</li>
-            <li>The app returns the official faqs.json answer.</li>
+            <li>The app returns the official FAQ answer.</li>
             <li>If no FAQ matches, it safely refuses.</li>
           </ol>
         </section>

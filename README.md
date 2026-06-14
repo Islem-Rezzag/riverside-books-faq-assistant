@@ -1,8 +1,8 @@
 # Riverside Books FAQ Assistant
 
 A TypeScript command-line FAQ chatbot for the Magnus Consulting AI Graduate
-technical task. It uses `faqs.json`, accepts customer questions, routes each
-question to the most relevant FAQ, and prints only the approved FAQ answer.
+technical task. It accepts customer questions, routes each question to the most
+relevant FAQ, and prints only the approved official FAQ answer.
 
 ## What The App Does
 
@@ -10,11 +10,11 @@ question to the most relevant FAQ, and prints only the approved FAQ answer.
 - Sends each customer question to an LLM router.
 - The router returns a structured decision: FAQ ID or no match.
 - The app validates the decision before answering.
-- The final customer answer always comes from `faqs.json`.
+- The final customer answer always comes from official FAQ content.
 - The loop continues until the user types `quit` or `exit`.
 
-`faqs.json` is the source of truth. The LLM never writes the final customer
-answer.
+The official FAQ content is the source of truth. The LLM never writes the final
+customer answer.
 
 ## Install
 
@@ -73,10 +73,10 @@ Run the eval set with an API key configured:
 npm run eval
 ```
 
-## Optional Web UI Demo
+## Web UI Demo
 
-The required solution is the CLI. There is also a small optional local web demo
-for presentation:
+The CLI is the core technical task solution. A lightweight Web UI Demo is
+included to make the routing behaviour easier to review:
 
 ```bash
 npm run ui:dev
@@ -86,7 +86,7 @@ Then open `http://localhost:5173`.
 
 The UI uses a local Node server and calls `POST /api/ask`. The browser never
 calls OpenAI directly and never receives `OPENAI_API_KEY`; routing stays
-server-side and the final answer still comes from `faqs.json`.
+server-side and the final answer still comes from official FAQ content.
 
 You can also run the UI build check:
 
@@ -100,13 +100,13 @@ Eval results can vary slightly because the router uses an LLM.
 
 The app uses an LLM router only:
 
-1. Load and validate `faqs.json`.
+1. Load and validate the official FAQ content.
 2. Send the FAQ list and customer question to the configured OpenAI model.
 3. Ask for structured JSON containing `answerable`, `matchedFaqId`,
    `confidence`, and `reason`.
 4. Validate the structured decision locally.
 5. If the decision is valid and confident, print the matching FAQ answer from
-   `faqs.json`.
+   official FAQ content.
 6. If the decision is not valid, not confident, or says no match, print the safe
    fallback.
 
@@ -123,7 +123,7 @@ could not be completed.
 
 The model is used only to select a FAQ ID or no match. It is explicitly told not
 to answer the customer or invent policy. The final answer is always copied from
-the approved FAQ record in `faqs.json`.
+the approved official FAQ content.
 
 ## No-Good-Answer Handling
 
@@ -142,7 +142,7 @@ The app prints a technical issue message when:
 - `OPENAI_API_KEY` is missing at startup.
 - The OpenAI request fails after the configured retry count.
 - The router returns malformed structured output.
-- The router returns an FAQ ID that does not exist in `faqs.json`.
+- The router returns an FAQ ID that does not exist in the official FAQ content.
 
 ## Trade-Offs
 
@@ -159,7 +159,8 @@ The app prints a technical issue message when:
 
 ## Assumptions
 
-- `faqs.json` is trusted source data and should not be edited by the app.
+- The official FAQ content is trusted source data and should not be edited by
+  the app.
 - FAQ IDs are stable and unique.
 - A safe refusal is better than a confident but unsupported answer.
 - A CLI is sufficient for the required task.
