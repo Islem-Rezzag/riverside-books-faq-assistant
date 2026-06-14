@@ -1,7 +1,7 @@
 # Riverside Books FAQ Assistant
 
 A TypeScript command-line FAQ chatbot for the Magnus Consulting AI Graduate
-technical task. It accepts customer questions, routes each question to the most
+Internship technical assesssment. It accepts customer questions, routes each question to the most
 relevant FAQ, and prints only the approved official FAQ answer.
 
 ## What The App Does
