@@ -147,7 +147,11 @@ export async function routeQuestionWithLLM(
     return technicalError(config.openAIModel, "OPENAI_API_KEY is not configured");
   }
 
-  const client = new OpenAI({ apiKey: config.openAIApiKey });
+  const client = new OpenAI({
+    apiKey: config.openAIApiKey,
+    timeout: config.llmTimeoutMs,
+    maxRetries: 0,
+  });
   const maxAttempts = Math.max(1, config.llmMaxRetries + 1);
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {

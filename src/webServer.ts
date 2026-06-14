@@ -26,6 +26,7 @@ interface AskResponse {
   reason: string;
   model: string;
   source: ApiSource;
+  elapsedMs: number;
 }
 
 const DEFAULT_PORT = 5173;
@@ -72,6 +73,19 @@ function sendText(
   response.end(message);
 }
 
+function stripAssistantPrefix(answer: string): string {
+  return answer.startsWith("Riverside Books: ")
+    ? answer.slice("Riverside Books: ".length)
+    : answer;
+}
+
+function withElapsed(response: Omit<AskResponse, "elapsedMs">, startedAt: number): AskResponse {
+  return {
+    ...response,
+    elapsedMs: Date.now() - startedAt,
+  };
+}
+
 async function readRequestBody(request: IncomingMessage): Promise<string> {
   const chunks: Buffer[] = [];
 
@@ -97,11 +111,14 @@ function parseQuestion(body: string): string | null {
   return parsed.question.trim();
 }
 
-function mapRouteResult(result: RouteResult): AskResponse {
+function mapRouteResult(
+  result: RouteResult,
+  startedAt: number,
+): AskResponse {
   if (result.status === "success") {
-    return {
+    return withElapsed({
       status: "success",
-      answer: result.faq.answer,
+      answer: stripAssistantPrefix(result.faq.answer),
       faqId: result.faq.id,
       faqQuestion: result.faq.question,
       faqAnswer: result.faq.answer,
@@ -109,13 +126,13 @@ function mapRouteResult(result: RouteResult): AskResponse {
       reason: result.reason,
       model: result.model,
       source: "Official FAQ",
-    };
+    }, startedAt);
   }
 
   if (result.status === "no_match") {
-    return {
+    return withElapsed({
       status: "no_match",
-      answer: NO_MATCH_MESSAGE,
+      answer: stripAssistantPrefix(NO_MATCH_MESSAGE),
       faqId: null,
       faqQuestion: null,
       faqAnswer: null,
@@ -123,12 +140,12 @@ function mapRouteResult(result: RouteResult): AskResponse {
       reason: result.reason,
       model: result.model,
       source: "None",
-    };
+    }, startedAt);
   }
 
-  return {
+  return withElapsed({
     status: "technical_error",
-    answer: TECHNICAL_ISSUE_MESSAGE,
+    answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
     faqId: null,
     faqQuestion: null,
     faqAnswer: null,
@@ -136,13 +153,13 @@ function mapRouteResult(result: RouteResult): AskResponse {
     reason: result.reason,
     model: result.model,
     source: "None",
-  };
+  }, startedAt);
 }
 
-function setupErrorResponse(model: string): AskResponse {
-  return {
+function setupErrorResponse(model: string, startedAt: number): AskResponse {
+  return withElapsed({
     status: "technical_error",
-    answer: SETUP_MESSAGE,
+    answer: stripAssistantPrefix(SETUP_MESSAGE),
     faqId: null,
     faqQuestion: null,
     faqAnswer: null,
@@ -150,13 +167,13 @@ function setupErrorResponse(model: string): AskResponse {
     reason: "OPENAI_API_KEY is not configured",
     model,
     source: "None",
-  };
+  }, startedAt);
 }
 
-function emptyQuestionResponse(model: string): AskResponse {
-  return {
+function emptyQuestionResponse(model: string, startedAt: number): AskResponse {
+  return withElapsed({
     status: "no_match",
-    answer: "Riverside Books: Please enter a question.",
+    answer: "Please enter a question.",
     faqId: null,
     faqQuestion: null,
     faqAnswer: null,
@@ -164,7 +181,7 @@ function emptyQuestionResponse(model: string): AskResponse {
     reason: "empty question",
     model,
     source: "None",
-  };
+  }, startedAt);
 }
 
 async function handleAsk(
@@ -172,14 +189,21 @@ async function handleAsk(
   response: ServerResponse,
   faqs: FAQ[],
 ): Promise<void> {
+  const startedAt = Date.now();
   const config = loadConfig();
   const body = await readRequestBody(request);
-  const question = parseQuestion(body);
+  let question: string | null;
+
+  try {
+    question = parseQuestion(body);
+  } catch {
+    question = null;
+  }
 
   if (question === null) {
-    sendJson(response, 400, {
+    sendJson(response, 400, withElapsed({
       status: "technical_error",
-      answer: TECHNICAL_ISSUE_MESSAGE,
+      answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
       faqId: null,
       faqQuestion: null,
       faqAnswer: null,
@@ -187,22 +211,22 @@ async function handleAsk(
       reason: "invalid request body",
       model: config.openAIModel,
       source: "None",
-    } satisfies AskResponse);
+    }, startedAt) satisfies AskResponse);
     return;
   }
 
   if (question === "") {
-    sendJson(response, 200, emptyQuestionResponse(config.openAIModel));
+    sendJson(response, 200, emptyQuestionResponse(config.openAIModel, startedAt));
     return;
   }
 
   if (!config.openAIApiKey) {
-    sendJson(response, 200, setupErrorResponse(config.openAIModel));
+    sendJson(response, 200, setupErrorResponse(config.openAIModel, startedAt));
     return;
   }
 
   const result = await routeQuestionWithLLM(question, faqs, config);
-  sendJson(response, 200, mapRouteResult(result));
+  sendJson(response, 200, mapRouteResult(result, startedAt));
 }
 
 function safeStaticPath(requestPath: string): string | null {
@@ -267,7 +291,7 @@ async function main(): Promise<void> {
       if (!response.headersSent) {
         sendJson(response, 500, {
           status: "technical_error",
-          answer: TECHNICAL_ISSUE_MESSAGE,
+          answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
           faqId: null,
           faqQuestion: null,
           faqAnswer: null,
@@ -275,6 +299,7 @@ async function main(): Promise<void> {
           reason: "server error",
           model: loadConfig().openAIModel,
           source: "None",
+          elapsedMs: 0,
         } satisfies AskResponse);
       } else {
         response.end();

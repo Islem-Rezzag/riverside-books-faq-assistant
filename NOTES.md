@@ -12,7 +12,7 @@ The app is now an LLM-router CLI:
    messages.
 5. `src/eval.ts` validates or runs the labelled evaluation set.
 
-There is no lexical matcher, embedding matcher, vector store, UI, or generated
+There is no lexical matcher, embedding matcher, vector store, or generated
 answer path.
 
 ## Web UI Demo
@@ -23,7 +23,8 @@ The Web UI Demo is static HTML, CSS, and JavaScript served by `src/webServer.ts`
 - `GET /styles.css` and `GET /app.js` serve static assets.
 - `POST /api/ask` sends the question to the server-side LLM router.
 - The browser receives only the structured route result and official FAQ answer.
-- Routing stays on the server-side LLM router.
+- The Web UI Demo is a thin interface layer over the same server-side router.
+- The final answer still comes from official FAQ content.
 - No OpenAI API key is referenced or exposed in client-side code.
 
 ## Structured Output

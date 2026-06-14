@@ -86,7 +86,8 @@ Then open `http://localhost:5173`.
 
 The UI uses a local Node server and calls `POST /api/ask`. The browser never
 calls OpenAI directly and never receives `OPENAI_API_KEY`; routing stays
-server-side and the final answer still comes from official FAQ content.
+server-side through the same LLM router, and the final answer still comes from
+official FAQ content. The Web UI Demo is not a separate architecture.
 
 You can also run the UI build check:
 
@@ -95,6 +96,9 @@ npm run ui:build
 ```
 
 Eval results can vary slightly because the router uses an LLM.
+
+`LLM_TIMEOUT_MS` controls how long each LLM routing request can wait before the
+app returns a technical issue response.
 
 ## Matching Approach
 
@@ -154,6 +158,8 @@ The app prints a technical issue message when:
   final answer generation.
 - API dependency: the chatbot needs `OPENAI_API_KEY`; without it, the app exits
   with a setup message.
+- Timeout behavior: `LLM_TIMEOUT_MS` limits long-running API requests so the app
+  can return a clear technical issue instead of waiting indefinitely.
 - Prompt injection: the system prompt treats user text as untrusted, and local
   validation rejects invalid routes.
 

@@ -9,6 +9,7 @@ const faqIdValue = document.querySelector("#faqIdValue");
 const confidenceValue = document.querySelector("#confidenceValue");
 const modelValue = document.querySelector("#modelValue");
 const sourceValue = document.querySelector("#sourceValue");
+const responseTimeValue = document.querySelector("#responseTimeValue");
 const reasonText = document.querySelector("#reasonText");
 const exampleButtons = document.querySelectorAll(".example-button");
 const EMPTY_VALUE = "\u2014";
@@ -22,7 +23,7 @@ function appendMessage(role, text) {
   label.textContent = role === "user" ? "You" : "Riverside Books";
 
   const body = document.createElement("p");
-  body.textContent = text;
+  body.textContent = role === "assistant" ? stripAssistantPrefix(text) : text;
 
   message.append(label, body);
   messageLog.append(message);
@@ -30,6 +31,10 @@ function appendMessage(role, text) {
 }
 
 function formatStatus(status) {
+  if (status === "checking") {
+    return "Checking official FAQs...";
+  }
+
   if (status === "success") {
     return "Success";
   }
@@ -54,9 +59,16 @@ function setStatusBadge(status) {
         ? "status-no-match"
         : status === "technical_error"
           ? "status-technical-error"
-          : "status-idle",
+          : status === "checking"
+            ? "status-checking"
+            : "status-idle",
   );
   statusBadge.textContent = formatStatus(status);
+}
+
+function stripAssistantPrefix(text) {
+  const prefix = "Riverside Books: ";
+  return text.startsWith(prefix) ? text.slice(prefix.length) : text;
 }
 
 function renderDetails(data) {
@@ -66,6 +78,8 @@ function renderDetails(data) {
     typeof data.confidence === "number" ? data.confidence.toFixed(2) : EMPTY_VALUE;
   modelValue.textContent = data.model || EMPTY_VALUE;
   sourceValue.textContent = data.source && data.source !== "None" ? data.source : EMPTY_VALUE;
+  responseTimeValue.textContent =
+    typeof data.elapsedMs === "number" ? `${data.elapsedMs} ms` : EMPTY_VALUE;
   reasonText.textContent = data.reason || "No routing reason returned.";
 
   if (data.status === "success") {
@@ -89,14 +103,20 @@ function renderDetails(data) {
 function setLoading(isLoading) {
   sendButton.disabled = isLoading;
   input.disabled = isLoading;
-  sendButton.textContent = isLoading ? "Checking" : "Send";
+  sendButton.textContent = isLoading ? "Checking..." : "Send";
+
+  if (isLoading) {
+    setStatusBadge("checking");
+    reasonText.textContent = "Checking official FAQs...";
+    responseTimeValue.textContent = EMPTY_VALUE;
+  }
 }
 
 function renderNetworkError() {
   const fallback = {
     status: "technical_error",
     answer:
-      "Riverside Books: Sorry, I'm having trouble checking the FAQs right now. Please try again in a moment or ask a member of staff.",
+      "Sorry, I'm having trouble checking the FAQs right now. Please try again in a moment or ask a member of staff.",
     faqId: null,
     faqQuestion: null,
     faqAnswer: null,
@@ -104,6 +124,7 @@ function renderNetworkError() {
     reason: "network or server error",
     model: "",
     source: "None",
+    elapsedMs: null,
   };
 
   appendMessage("assistant", fallback.answer);

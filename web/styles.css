@@ -189,6 +189,8 @@ button {
 }
 
 .message-log {
+  width: min(100%, 820px);
+  margin: 0 auto;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -197,7 +199,7 @@ button {
 }
 
 .message {
-  max-width: min(720px, 88%);
+  max-width: min(620px, 88%);
   border-radius: 8px;
   padding: 14px 16px;
   line-height: 1.5;
@@ -357,6 +359,11 @@ button {
 .status-technical-error {
   background: var(--red-soft);
   color: var(--red);
+}
+
+.status-checking {
+  background: #e9f1fb;
+  color: var(--navy-soft);
 }
 
 .reason-text {

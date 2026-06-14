@@ -5,12 +5,14 @@ export interface AppConfig {
   openAIModel: string;
   llmConfidenceThreshold: number;
   llmMaxRetries: number;
+  llmTimeoutMs: number;
   showDebug: boolean;
 }
 
 const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
 const DEFAULT_LLM_CONFIDENCE_THRESHOLD = 0.7;
 const DEFAULT_LLM_MAX_RETRIES = 1;
+const DEFAULT_LLM_TIMEOUT_MS = 20_000;
 
 function readNumber(name: string, fallback: number): number {
   const value = process.env[name]?.trim();
@@ -56,6 +58,7 @@ export function loadConfig(): AppConfig {
       DEFAULT_LLM_CONFIDENCE_THRESHOLD,
     ),
     llmMaxRetries: readInteger("LLM_MAX_RETRIES", DEFAULT_LLM_MAX_RETRIES),
+    llmTimeoutMs: readInteger("LLM_TIMEOUT_MS", DEFAULT_LLM_TIMEOUT_MS),
     showDebug: readBoolean("SHOW_DEBUG", false),
   };
 }

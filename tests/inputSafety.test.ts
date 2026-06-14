@@ -23,6 +23,7 @@ describe("input safety", () => {
       openAIModel: "gpt-4o-mini",
       llmConfidenceThreshold: 0.7,
       llmMaxRetries: 1,
+      llmTimeoutMs: 20_000,
       showDebug: false,
     };
     const faqs: FAQ[] = [
