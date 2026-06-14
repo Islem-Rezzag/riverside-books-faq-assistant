@@ -100,7 +100,7 @@ Eval results can vary slightly because the router uses an LLM.
 `LLM_TIMEOUT_MS` controls how long each LLM routing request can wait before the
 app returns a technical issue response.
 
-## Matching Approach
+## Final Routing Approach
 
 The app uses an LLM router only:
 
@@ -116,12 +116,15 @@ The app uses an LLM router only:
 
 Default model: `gpt-4o-mini`.
 
-## Why No Lexical Fallback
+## Alternatives Considered
 
-The previous lexical matcher was removed. If the AI router fails, silently
-falling back to a weaker matcher could return the wrong policy with confidence.
-A clear technical issue message is safer because it tells the user the FAQ check
-could not be completed.
+- Keyword, fuzzy, and lexical matching were considered, but customer intent can
+  be indirect and similar FAQ categories can overlap.
+- Embeddings or semantic search were considered, but the FAQ set is small and
+  the task is routing to one approved FAQ answer.
+- The final design uses LLM routing plus local validation. If the router fails,
+  the app returns a clear technical issue instead of silently falling back to a
+  weaker matcher.
 
 ## Why No Generated Answers
 

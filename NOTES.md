@@ -12,8 +12,9 @@ The app is now an LLM-router CLI:
    messages.
 5. `src/eval.ts` validates or runs the labelled evaluation set.
 
-There is no lexical matcher, embedding matcher, vector store, or generated
-answer path.
+There is no lexical, keyword, or fuzzy matcher at runtime. There is also no
+embedding matcher, semantic-search layer, vector store, or generated-answer
+path.
 
 ## Web UI Demo
 
@@ -80,6 +81,9 @@ The model output is never printed as the customer answer.
 ## Design Decisions
 
 - Use the LLM for classification/routing only.
+- Use the official FAQ content as the only source for customer-facing answers.
+- Keep keyword/fuzzy matching and embeddings as considered alternatives, not
+  implemented runtime paths.
 - Prefer technical failure over a silent weak fallback.
 - Keep the router output narrow and validated.
 - Keep secrets outside the repository.
