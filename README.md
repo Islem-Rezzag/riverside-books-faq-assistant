@@ -16,9 +16,17 @@ relevant FAQ, and prints only the approved official FAQ answer.
 The official FAQ content is the source of truth. The LLM never writes the final
 customer answer.
 
-## Install
+## Prerequisites
+
+- Node.js 20+ recommended
+- npm
+- An OpenAI API key
+
+## Setup
 
 ```bash
+git clone https://github.com/Islem-Rezzag/riverside-books-faq-assistant.git
+cd riverside-books-faq-assistant
 npm install
 ```
 
@@ -26,57 +34,84 @@ npm install
 
 The LLM router requires an OpenAI API key at runtime.
 
-Create a local `.env` file from `.env.example`, then set:
+`.env.example` is a template. Copy it to a local `.env` file, then edit `.env`
+with your real key.
 
-```text
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+notepad .env
+```
+
+macOS, Linux, or Git Bash:
+
+```bash
+cp .env.example .env
+```
+
+Set this inside `.env`:
+
+```env
 OPENAI_API_KEY=your_real_key_here
 ```
 
-Never commit `.env`, `.env.*`, API keys, or secret links. The repository tracks
-only `.env.example` with placeholder values.
+`.env` is local and private. Never commit `.env`, `.env.*`, API keys, or secret
+links. The repository should only track `.env.example` with placeholder values.
 
-## Run
+## Commands That Do Not Require An API Key
 
-Development mode:
+```bash
+npm test
+npm run build
+npm run eval:validate
+npm run ui:build
+```
+
+Expected `npm run eval:validate` summary:
+
+```text
+total: 55
+paraphrase: 40
+out_of_scope: 10
+prompt_injection: 5
+```
+
+## Commands That Use The API Key
 
 ```bash
 npm run dev
+npm run eval
+npm run ui:dev
 ```
 
-Build:
+- `npm run dev` starts the CLI chatbot.
+- `npm run eval` runs the labelled eval set through the LLM router.
+- `npm run ui:dev` starts the Web UI Demo at `http://localhost:5173`.
 
-```bash
-npm run build
+Expected `npm run dev` startup:
+
+```text
+Riverside Books FAQ Assistant
+Using LLM router.
 ```
 
-Compiled app:
+The UI can load without a key, but asking a question will return a setup or
+technical issue response until the server-side router can access
+`OPENAI_API_KEY`.
+
+Compiled CLI after building:
 
 ```bash
 npm start
 ```
 
-Tests:
-
-```bash
-npm test
-```
-
-Validate the eval fixture without API calls:
-
-```bash
-npm run eval:validate
-```
-
-Run the eval set with an API key configured:
-
-```bash
-npm run eval
-```
-
 ## Web UI Demo
 
 The CLI is the core technical task solution. A lightweight Web UI Demo is
-included to make the routing behaviour easier to review:
+included to make the routing behaviour easier to review.
+
+Start it with:
 
 ```bash
 npm run ui:dev
@@ -84,23 +119,23 @@ npm run ui:dev
 
 Then open `http://localhost:5173`.
 
-The UI uses a local Node server and calls `POST /api/ask`. The browser never
-calls OpenAI directly and never receives `OPENAI_API_KEY`; routing stays
-server-side through the same LLM router, and the final answer still comes from
-official FAQ content. The Web UI Demo is not a separate architecture.
-
-You can also run the UI build check:
+You can also run the UI build check without an API key:
 
 ```bash
 npm run ui:build
 ```
+
+The UI uses a local Node server and calls `POST /api/ask`. The browser never
+calls OpenAI directly and never receives `OPENAI_API_KEY`; routing stays
+server-side through the same LLM router, and the final answer still comes from
+official FAQ content. The Web UI Demo is not a separate architecture.
 
 Eval results can vary slightly because the router uses an LLM.
 
 `LLM_TIMEOUT_MS` controls how long each LLM routing request can wait before the
 app returns a technical issue response.
 
-## Matching Approach
+## Final Routing Approach
 
 The app uses an LLM router only:
 
@@ -116,12 +151,15 @@ The app uses an LLM router only:
 
 Default model: `gpt-4o-mini`.
 
-## Why No Lexical Fallback
+## Alternatives Considered
 
-The previous lexical matcher was removed. If the AI router fails, silently
-falling back to a weaker matcher could return the wrong policy with confidence.
-A clear technical issue message is safer because it tells the user the FAQ check
-could not be completed.
+- Keyword, fuzzy, and lexical matching were considered, but customer intent can
+  be indirect and similar FAQ categories can overlap.
+- Embeddings or semantic search were considered, but the FAQ set is small and
+  the task is routing to one approved FAQ answer.
+- The final design uses LLM routing plus local validation. If the router fails,
+  the app returns a clear technical issue instead of silently falling back to a
+  weaker matcher.
 
 ## Why No Generated Answers
 
@@ -147,6 +185,15 @@ The app prints a technical issue message when:
 - The OpenAI request fails after the configured retry count.
 - The router returns malformed structured output.
 - The router returns an FAQ ID that does not exist in the official FAQ content.
+
+## Troubleshooting
+
+- If you see `OpenAI API key is not configured`, check that `.env` exists in
+  the project root and contains `OPENAI_API_KEY=...`.
+- If API calls fail, check the key, model access, internet connection, and
+  `OPENAI_MODEL`.
+- If the Web UI loads but questions return a technical issue, the server-side
+  router likely cannot access the API key.
 
 ## Trade-Offs
 
