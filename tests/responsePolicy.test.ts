@@ -14,4 +14,9 @@ describe("response policy", () => {
 
     expect(new Set([NO_MATCH_MESSAGE, TECHNICAL_ISSUE_MESSAGE, SETUP_MESSAGE]).size).toBe(3);
   });
+
+  it("uses a plain ASCII hyphen in the no-match message", () => {
+    expect(NO_MATCH_MESSAGE).not.toContain("\u00e2\u20ac\u201d");
+    expect(NO_MATCH_MESSAGE).toContain(" - ");
+  });
 });
