@@ -2,40 +2,86 @@
 
 ## Architecture Overview
 
-The CLI loads configuration, validates `faqs.json`, creates the best available
-matcher, and then reads questions from standard input until the user exits.
+The app is now an LLM-router CLI:
 
-The matcher layer has two implementations:
+1. `src/cli.ts` loads config and FAQ data, then runs the terminal loop.
+2. `src/llmRouter.ts` calls OpenAI Chat Completions with structured JSON output.
+3. `src/routerValidation.ts` validates the router decision against `faqs.json`.
+4. `src/responsePolicy.ts` owns the no-match, setup, and technical issue
+   messages.
+5. `src/eval.ts` validates or runs the labelled evaluation set.
 
-- `lexicalMatcher`: offline matching using token overlap, FAQ aliases, synonym
-  expansion, thresholds, and ambiguity margins.
-- `semanticMatcher`: optional OpenAI embedding matching using
-  `text-embedding-3-small`.
+There is no lexical matcher, embedding matcher, vector store, UI, or generated
+answer path.
 
-Both matchers return a `MatchResult`. The CLI is responsible for printing either
-the approved FAQ answer or the safe fallback message.
+## Structured Output
 
-## Main Design Decisions
+The router asks the model for:
 
-- FAQ answers are never generated. The app only returns text from `faqs.json`.
-- OpenAI embeddings are optional so the app remains usable without secrets,
-  network access, or API spend.
-- Confidence checks are shared across matchers so low-confidence and ambiguous
-  results are handled consistently.
-- Lexical aliases are explicit because the FAQ set is small and known.
-- The fallback message lives in the CLI rather than inside the matcher.
+```json
+{
+  "answerable": true,
+  "matchedFaqId": 1,
+  "confidence": 0.9,
+  "reason": "The customer asks about opening hours."
+}
+```
+
+The JSON is not trusted just because it came from the model. It must pass local
+validation before the CLI prints an answer.
+
+## Validation
+
+Validation checks:
+
+- `answerable` is a boolean.
+- `matchedFaqId` is either `null` or an existing FAQ ID.
+- `confidence` is finite and between 0 and 1.
+- `reason` is a string.
+- confidence is at least `LLM_CONFIDENCE_THRESHOLD`.
+
+Invalid structured output becomes a technical error. Low-confidence or explicit
+no-match output becomes a no-match response.
+
+## Response Policy
+
+The CLI prints one of three response types:
+
+- Approved FAQ answer from `faqs.json`.
+- No-match fallback when the question cannot be safely answered.
+- Technical issue message when the router or setup fails.
+
+The model output is never printed as the customer answer.
+
+## Evaluation Set
+
+`evals/faq-eval.json` contains:
+
+- 40 positive paraphrases, two for each FAQ.
+- 10 out-of-scope questions.
+- 5 prompt-injection/security questions.
+
+`npm run eval:validate` validates fixture shape and counts without API calls.
+`npm run eval` requires `OPENAI_API_KEY` and routes each case through the LLM.
+
+## Design Decisions
+
+- Use the LLM for classification/routing only.
+- Prefer technical failure over a silent weak fallback.
+- Keep the router output narrow and validated.
+- Keep secrets outside the repository.
+- Keep the implementation CLI-only for the core task.
 
 ## Known Limitations
 
-- Lexical matching can miss phrasing that has no overlapping useful terms.
-- Manual aliases need maintenance if the FAQ data changes.
-- Embeddings are recomputed on startup when OpenAI matching is enabled.
-- The app has no conversation memory; each question is handled independently.
+- Runtime depends on OpenAI availability and a configured API key.
+- Eval accuracy depends on the model and threshold.
+- There is no conversation memory.
+- The app does not cache model decisions.
 
 ## Possible Improvements
 
-- Add a larger labelled evaluation set for threshold tuning.
-- Cache FAQ embeddings between runs.
-- Add clearer debug reports for the top few rejected matches.
-- Add validation for duplicate FAQ IDs.
-- Consider a lightweight UI only after the CLI is complete and evaluated.
+- Add more eval cases from real failed conversations.
+- Tune thresholds using measured eval runs.
+- Add duplicate FAQ ID validation.
+- Add structured operational logs that never include secrets.
