@@ -6,22 +6,36 @@ export interface FAQ {
   answer: string;
 }
 
-export type MatcherName = "lexical" | "semantic";
-
-export interface MatchCandidate {
-  faq: FAQ;
-  score: number;
-}
-
-export interface MatchResult {
-  faq: FAQ | null;
-  score: number;
-  secondBestScore: number;
-  matcher: MatcherName;
+export interface RouterDecision {
+  answerable: boolean;
+  matchedFaqId: number | null;
+  confidence: number;
   reason: string;
 }
 
-export interface Matcher {
-  name: MatcherName;
-  match(question: string): Promise<MatchResult>;
-}
+export type ValidatedRoute =
+  | {
+      status: "success";
+      faq: FAQ;
+      matchedFaqId: number;
+      confidence: number;
+      reason: string;
+    }
+  | {
+      status: "no_match";
+      faq: null;
+      matchedFaqId: number | null;
+      confidence: number;
+      reason: string;
+    }
+  | {
+      status: "technical_error";
+      faq: null;
+      matchedFaqId: number | null;
+      confidence: number | null;
+      reason: string;
+    };
+
+export type RouteResult = ValidatedRoute & {
+  model: string;
+};

@@ -2,17 +2,15 @@ import "dotenv/config";
 
 export interface AppConfig {
   openAIApiKey?: string;
-  semanticMatchThreshold: number;
-  semanticMatchMargin: number;
-  lexicalMatchThreshold: number;
-  lexicalMatchMargin: number;
+  openAIModel: string;
+  llmConfidenceThreshold: number;
+  llmMaxRetries: number;
   showDebug: boolean;
 }
 
-const DEFAULT_SEMANTIC_MATCH_THRESHOLD = 0.4;
-const DEFAULT_SEMANTIC_MATCH_MARGIN = 0.03;
-const DEFAULT_LEXICAL_MATCH_THRESHOLD = 0.32;
-const DEFAULT_LEXICAL_MATCH_MARGIN = 0.02;
+const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+const DEFAULT_LLM_CONFIDENCE_THRESHOLD = 0.7;
+const DEFAULT_LLM_MAX_RETRIES = 1;
 
 function readNumber(name: string, fallback: number): number {
   const value = process.env[name]?.trim();
@@ -35,27 +33,29 @@ function readBoolean(name: string, fallback: boolean): boolean {
   return value === "true" || value === "1" || value === "yes";
 }
 
+function readInteger(name: string, fallback: number): number {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
+}
+
 export function loadConfig(): AppConfig {
   const openAIApiKey = process.env.OPENAI_API_KEY?.trim();
+  const openAIModel = process.env.OPENAI_MODEL?.trim() || DEFAULT_OPENAI_MODEL;
 
   return {
     ...(openAIApiKey ? { openAIApiKey } : {}),
-    semanticMatchThreshold: readNumber(
-      "SEMANTIC_MATCH_THRESHOLD",
-      DEFAULT_SEMANTIC_MATCH_THRESHOLD,
+    openAIModel,
+    llmConfidenceThreshold: readNumber(
+      "LLM_CONFIDENCE_THRESHOLD",
+      DEFAULT_LLM_CONFIDENCE_THRESHOLD,
     ),
-    semanticMatchMargin: readNumber(
-      "SEMANTIC_MATCH_MARGIN",
-      DEFAULT_SEMANTIC_MATCH_MARGIN,
-    ),
-    lexicalMatchThreshold: readNumber(
-      "LEXICAL_MATCH_THRESHOLD",
-      DEFAULT_LEXICAL_MATCH_THRESHOLD,
-    ),
-    lexicalMatchMargin: readNumber(
-      "LEXICAL_MATCH_MARGIN",
-      DEFAULT_LEXICAL_MATCH_MARGIN,
-    ),
+    llmMaxRetries: readInteger("LLM_MAX_RETRIES", DEFAULT_LLM_MAX_RETRIES),
     showDebug: readBoolean("SHOW_DEBUG", false),
   };
 }

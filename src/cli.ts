@@ -3,30 +3,38 @@ import { stdin as input, stdout as output } from "node:process";
 
 import { loadConfig } from "./config.js";
 import { loadFaqs } from "./faqs.js";
-import { createMatcher } from "./matchers/matcher.js";
-import type { MatchResult } from "./types.js";
+import { routeQuestionWithLLM } from "./llmRouter.js";
+import {
+  NO_MATCH_MESSAGE,
+  SETUP_MESSAGE,
+  TECHNICAL_ISSUE_MESSAGE,
+} from "./responsePolicy.js";
+import type { RouteResult } from "./types.js";
 
-const FALLBACK_MESSAGE =
-  "Riverside Books: Sorry, I don't know that one \u2014 please ask a member of staff.";
-
-function printDebug(result: MatchResult): void {
-  const matchedFaqId = result.faq?.id ?? "none";
+function printDebug(result: RouteResult): void {
+  const matchedFaqId = result.matchedFaqId ?? "none";
+  const confidence =
+    result.confidence === null ? "none" : result.confidence.toFixed(3);
 
   console.log(
-    `Debug: score=${result.score.toFixed(3)} secondBestScore=${result.secondBestScore.toFixed(
-      3,
-    )} matcher=${result.matcher} reason=${result.reason} faqId=${matchedFaqId}`,
+    `Debug: status=${result.status} faqId=${matchedFaqId} confidence=${confidence} reason=${result.reason} model=${result.model}`,
   );
 }
 
 async function main(): Promise<void> {
   const config = loadConfig();
   const faqs = await loadFaqs();
-  const matcher = await createMatcher(faqs, config);
+
+  if (!config.openAIApiKey) {
+    console.error(SETUP_MESSAGE);
+    process.exitCode = 1;
+    return;
+  }
+
   const readline = createInterface({ input, output });
 
   console.log("Riverside Books FAQ Assistant");
-  console.log(`Using ${matcher.name} matcher.`);
+  console.log("Using LLM router.");
   console.log('Type "quit" or "exit" to leave.');
 
   try {
@@ -43,12 +51,14 @@ async function main(): Promise<void> {
         continue;
       }
 
-      const result = await matcher.match(question);
+      const result = await routeQuestionWithLLM(question, faqs, config);
 
-      if (result.faq) {
+      if (result.status === "success") {
         console.log(`Riverside Books: ${result.faq.answer}`);
+      } else if (result.status === "no_match") {
+        console.log(NO_MATCH_MESSAGE);
       } else {
-        console.log(FALLBACK_MESSAGE);
+        console.log(TECHNICAL_ISSUE_MESSAGE);
       }
 
       if (config.showDebug) {

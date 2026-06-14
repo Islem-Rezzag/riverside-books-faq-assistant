@@ -8,7 +8,9 @@
     "dev": "tsx src/cli.ts",
     "build": "tsc",
     "start": "node dist/src/cli.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval": "tsx src/eval.ts",
+    "eval:validate": "tsx src/eval.ts --validate-only"
   },
   "author": "Mohamed Islem Rezzag Baara",
   "license": "ISC",
