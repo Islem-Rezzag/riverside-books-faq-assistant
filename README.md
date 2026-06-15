@@ -252,7 +252,7 @@ Check the API key, model access, internet connection, and `OPENAI_MODEL`.
 
 The UI is running, but the server-side router likely cannot access the API key.
 
-## What I Would Do With More Time
+## Future work
 
 - Run the eval set repeatedly and tune `LLM_CONFIDENCE_THRESHOLD`.
 - Add more adversarial prompt-injection examples.
