@@ -1,11 +1,10 @@
 # Riverside Books FAQ Assistant
 
-A TypeScript FAQ assistant for the Magnus Consulting AI Graduate technical
-task.
+A TypeScript FAQ assistant built for the Magnus Consulting AI Graduate technical task.
 
-The required solution is a command-line chatbot.
-A lightweight Web UI Demo is also included to make the same routing behaviour
-easier to review.
+The project treats the task as an intent-routing problem: a customer asks a natural-language question, an LLM router selects the most relevant FAQ ID or returns no match, and the application validates that decision before returning the approved answer from the official FAQ content.
+
+The command-line chatbot is the core required solution. A lightweight Web UI Demo is also included as a presentation-friendly layer over the same server-side routing flow, making the decision process easier to inspect without changing the underlying architecture.
 
 ## What This App Does
 
