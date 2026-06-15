@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import {
+  createServer,
+  type IncomingMessage,
+  type ServerResponse,
+} from "node:http";
 import path from "node:path";
 import { URL } from "node:url";
 
@@ -79,7 +83,10 @@ function stripAssistantPrefix(answer: string): string {
     : answer;
 }
 
-function withElapsed(response: Omit<AskResponse, "elapsedMs">, startedAt: number): AskResponse {
+function withElapsed(
+  response: Omit<AskResponse, "elapsedMs">,
+  startedAt: number,
+): AskResponse {
   return {
     ...response,
     elapsedMs: Date.now() - startedAt,
@@ -111,28 +118,45 @@ function parseQuestion(body: string): string | null {
   return parsed.question.trim();
 }
 
-function mapRouteResult(
-  result: RouteResult,
-  startedAt: number,
-): AskResponse {
+function mapRouteResult(result: RouteResult, startedAt: number): AskResponse {
   if (result.status === "success") {
-    return withElapsed({
-      status: "success",
-      answer: stripAssistantPrefix(result.faq.answer),
-      faqId: result.faq.id,
-      faqQuestion: result.faq.question,
-      faqAnswer: result.faq.answer,
-      confidence: result.confidence,
-      reason: result.reason,
-      model: result.model,
-      source: "Official FAQ",
-    }, startedAt);
+    return withElapsed(
+      {
+        status: "success",
+        answer: stripAssistantPrefix(result.faq.answer),
+        faqId: result.faq.id,
+        faqQuestion: result.faq.question,
+        faqAnswer: result.faq.answer,
+        confidence: result.confidence,
+        reason: result.reason,
+        model: result.model,
+        source: "Official FAQ",
+      },
+      startedAt,
+    );
   }
 
   if (result.status === "no_match") {
-    return withElapsed({
-      status: "no_match",
-      answer: stripAssistantPrefix(NO_MATCH_MESSAGE),
+    return withElapsed(
+      {
+        status: "no_match",
+        answer: stripAssistantPrefix(NO_MATCH_MESSAGE),
+        faqId: null,
+        faqQuestion: null,
+        faqAnswer: null,
+        confidence: result.confidence,
+        reason: result.reason,
+        model: result.model,
+        source: "None",
+      },
+      startedAt,
+    );
+  }
+
+  return withElapsed(
+    {
+      status: "technical_error",
+      answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
       faqId: null,
       faqQuestion: null,
       faqAnswer: null,
@@ -140,48 +164,43 @@ function mapRouteResult(
       reason: result.reason,
       model: result.model,
       source: "None",
-    }, startedAt);
-  }
-
-  return withElapsed({
-    status: "technical_error",
-    answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
-    faqId: null,
-    faqQuestion: null,
-    faqAnswer: null,
-    confidence: result.confidence,
-    reason: result.reason,
-    model: result.model,
-    source: "None",
-  }, startedAt);
+    },
+    startedAt,
+  );
 }
 
 function setupErrorResponse(model: string, startedAt: number): AskResponse {
-  return withElapsed({
-    status: "technical_error",
-    answer: stripAssistantPrefix(SETUP_MESSAGE),
-    faqId: null,
-    faqQuestion: null,
-    faqAnswer: null,
-    confidence: null,
-    reason: "OPENAI_API_KEY is not configured",
-    model,
-    source: "None",
-  }, startedAt);
+  return withElapsed(
+    {
+      status: "technical_error",
+      answer: stripAssistantPrefix(SETUP_MESSAGE),
+      faqId: null,
+      faqQuestion: null,
+      faqAnswer: null,
+      confidence: null,
+      reason: "OPENAI_API_KEY is not configured",
+      model,
+      source: "None",
+    },
+    startedAt,
+  );
 }
 
 function emptyQuestionResponse(model: string, startedAt: number): AskResponse {
-  return withElapsed({
-    status: "no_match",
-    answer: "Please enter a question.",
-    faqId: null,
-    faqQuestion: null,
-    faqAnswer: null,
-    confidence: 0,
-    reason: "empty question",
-    model,
-    source: "None",
-  }, startedAt);
+  return withElapsed(
+    {
+      status: "no_match",
+      answer: "Please enter a question.",
+      faqId: null,
+      faqQuestion: null,
+      faqAnswer: null,
+      confidence: 0,
+      reason: "empty question",
+      model,
+      source: "None",
+    },
+    startedAt,
+  );
 }
 
 async function handleAsk(
@@ -201,22 +220,33 @@ async function handleAsk(
   }
 
   if (question === null) {
-    sendJson(response, 400, withElapsed({
-      status: "technical_error",
-      answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
-      faqId: null,
-      faqQuestion: null,
-      faqAnswer: null,
-      confidence: null,
-      reason: "invalid request body",
-      model: config.openAIModel,
-      source: "None",
-    }, startedAt) satisfies AskResponse);
+    sendJson(
+      response,
+      400,
+      withElapsed(
+        {
+          status: "technical_error",
+          answer: stripAssistantPrefix(TECHNICAL_ISSUE_MESSAGE),
+          faqId: null,
+          faqQuestion: null,
+          faqAnswer: null,
+          confidence: null,
+          reason: "invalid request body",
+          model: config.openAIModel,
+          source: "None",
+        },
+        startedAt,
+      ) satisfies AskResponse,
+    );
     return;
   }
 
   if (question === "") {
-    sendJson(response, 200, emptyQuestionResponse(config.openAIModel, startedAt));
+    sendJson(
+      response,
+      200,
+      emptyQuestionResponse(config.openAIModel, startedAt),
+    );
     return;
   }
 
@@ -230,7 +260,8 @@ async function handleAsk(
 }
 
 function safeStaticPath(requestPath: string): string | null {
-  const relativePath = requestPath === "/" ? "index.html" : requestPath.slice(1);
+  const relativePath =
+    requestPath === "/" ? "index.html" : requestPath.slice(1);
   const decodedPath = decodeURIComponent(relativePath);
   const resolvedPath = path.resolve(WEB_ROOT, decodedPath);
   const pathFromWebRoot = path.relative(WEB_ROOT, resolvedPath);
@@ -274,7 +305,10 @@ async function main(): Promise<void> {
 
   const server = createServer((request, response) => {
     void (async () => {
-      const requestUrl = new URL(request.url ?? "/", `http://${request.headers.host}`);
+      const requestUrl = new URL(
+        request.url ?? "/",
+        `http://${request.headers.host}`,
+      );
 
       if (request.method === "POST" && requestUrl.pathname === "/api/ask") {
         await handleAsk(request, response, faqs);

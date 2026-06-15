@@ -73,11 +73,15 @@ function stripAssistantPrefix(text) {
 
 function renderDetails(data) {
   setStatusBadge(data.status);
-  faqIdValue.textContent = data.faqId === null ? EMPTY_VALUE : `FAQ ${data.faqId}`;
+  faqIdValue.textContent =
+    data.faqId === null ? EMPTY_VALUE : `FAQ ${data.faqId}`;
   confidenceValue.textContent =
-    typeof data.confidence === "number" ? data.confidence.toFixed(2) : EMPTY_VALUE;
+    typeof data.confidence === "number"
+      ? data.confidence.toFixed(2)
+      : EMPTY_VALUE;
   modelValue.textContent = data.model || EMPTY_VALUE;
-  sourceValue.textContent = data.source && data.source !== "None" ? data.source : EMPTY_VALUE;
+  sourceValue.textContent =
+    data.source && data.source !== "None" ? data.source : EMPTY_VALUE;
   responseTimeValue.textContent =
     typeof data.elapsedMs === "number" ? `${data.elapsedMs} ms` : EMPTY_VALUE;
   reasonText.textContent = data.reason || "No routing reason returned.";

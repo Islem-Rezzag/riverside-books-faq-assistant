@@ -12,7 +12,9 @@ describe("response policy", () => {
     expect(TECHNICAL_ISSUE_MESSAGE.length).toBeGreaterThan(0);
     expect(SETUP_MESSAGE.length).toBeGreaterThan(0);
 
-    expect(new Set([NO_MATCH_MESSAGE, TECHNICAL_ISSUE_MESSAGE, SETUP_MESSAGE]).size).toBe(3);
+    expect(
+      new Set([NO_MATCH_MESSAGE, TECHNICAL_ISSUE_MESSAGE, SETUP_MESSAGE]).size,
+    ).toBe(3);
   });
 
   it("uses a plain ASCII hyphen in the no-match message", () => {

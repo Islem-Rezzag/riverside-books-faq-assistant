@@ -138,7 +138,10 @@ export async function routeQuestionWithLLM(
   }
 
   if (!config.openAIApiKey) {
-    return technicalError(config.openAIModel, "OPENAI_API_KEY is not configured");
+    return technicalError(
+      config.openAIModel,
+      "OPENAI_API_KEY is not configured",
+    );
   }
 
   const client = new OpenAI({
@@ -169,7 +172,10 @@ export async function routeQuestionWithLLM(
       const content = response.choices[0]?.message.content;
 
       if (typeof content !== "string" || content.trim() === "") {
-        return technicalError(config.openAIModel, "router returned an empty response");
+        return technicalError(
+          config.openAIModel,
+          "router returned an empty response",
+        );
       }
 
       const decision = parseRouterDecision(content);

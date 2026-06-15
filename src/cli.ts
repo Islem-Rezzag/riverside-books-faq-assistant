@@ -42,12 +42,17 @@ async function main(): Promise<void> {
       const rawQuestion = await readline.question("You: ");
       const question = rawQuestion.trim();
 
-      if (question.toLowerCase() === "quit" || question.toLowerCase() === "exit") {
+      if (
+        question.toLowerCase() === "quit" ||
+        question.toLowerCase() === "exit"
+      ) {
         break;
       }
 
       if (question === "") {
-        console.log('Riverside Books: Please enter a question, or type "quit" to exit.');
+        console.log(
+          'Riverside Books: Please enter a question, or type "quit" to exit.',
+        );
         continue;
       }
 

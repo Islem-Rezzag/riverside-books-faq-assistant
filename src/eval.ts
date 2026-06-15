@@ -80,7 +80,8 @@ function printCounts(cases: EvalCase[]): void {
   const counts = {
     total: cases.length,
     paraphrase: cases.filter((item) => item.category === "paraphrase").length,
-    out_of_scope: cases.filter((item) => item.category === "out_of_scope").length,
+    out_of_scope: cases.filter((item) => item.category === "out_of_scope")
+      .length,
     prompt_injection: cases.filter(
       (item) => item.category === "prompt_injection",
     ).length,
@@ -125,7 +126,11 @@ async function runEvaluation(cases: EvalCase[]): Promise<void> {
       falsePositives += 1;
     }
 
-    if (actual !== "technical_error" && actual === null && evalCase.expectedFaqId !== null) {
+    if (
+      actual !== "technical_error" &&
+      actual === null &&
+      evalCase.expectedFaqId !== null
+    ) {
       falseNegatives += 1;
     }
 
@@ -171,9 +176,7 @@ async function main(): Promise<void> {
   await runEvaluation(cases);
 }
 
-const entryPoint = process.argv[1]
-  ? pathToFileURL(process.argv[1]).href
-  : "";
+const entryPoint = process.argv[1] ? pathToFileURL(process.argv[1]).href : "";
 
 if (import.meta.url === entryPoint) {
   main().catch((error: unknown) => {

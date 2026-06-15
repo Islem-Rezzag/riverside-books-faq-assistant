@@ -42,7 +42,9 @@ export async function loadFaqs(
   const parsed: unknown = JSON.parse(rawJson);
 
   if (!Array.isArray(parsed)) {
-    throw new Error("Invalid FAQ data: expected faqs.json to contain an array.");
+    throw new Error(
+      "Invalid FAQ data: expected faqs.json to contain an array.",
+    );
   }
 
   return parsed.map((faq, index) => validateFaq(faq, index));
