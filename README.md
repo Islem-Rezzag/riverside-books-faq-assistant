@@ -36,6 +36,8 @@ cd riverside-books-faq-assistant
 npm install
 ```
 
+## API Key Setup
+
 Create a local `.env` file.
 
 Windows PowerShell:
