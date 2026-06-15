@@ -1,20 +1,26 @@
 # Riverside Books FAQ Assistant
 
-A TypeScript command-line FAQ chatbot for the Magnus Consulting AI Graduate
-Internship technical assesssment. It accepts customer questions, routes each question to the most
-relevant FAQ, and prints only the approved official FAQ answer.
+A TypeScript FAQ assistant for the Magnus Consulting AI Graduate technical task.
 
-## What The App Does
+The required solution is a command-line chatbot. A lightweight Web UI Demo is
+also included to make the same routing behaviour easier to review.
 
-- Starts a terminal chatbot for Riverside Books.
-- Sends each customer question to an LLM router.
-- The router returns a structured decision: FAQ ID or no match.
-- The app validates the decision before answering.
-- The final customer answer always comes from official FAQ content.
-- The loop continues until the user types `quit` or `exit`.
+## What This App Does
 
-The official FAQ content is the source of truth. The LLM never writes the final
-customer answer.
+This project implements a FAQ assistant for the fictional bookshop **Riverside
+Books**.
+
+For each customer question, the app:
+
+1. Loads the official FAQ content from `faqs.json`.
+2. Sends the customer question and FAQ list to an LLM router.
+3. Receives a structured routing decision: a FAQ ID or no match.
+4. Validates the routing decision locally.
+5. Returns the approved FAQ answer if the route is valid and confident.
+6. Returns a safe fallback if no FAQ is a good match.
+
+The LLM does **not** write the final customer answer. It only chooses a FAQ ID
+or no match. The final answer always comes from the official FAQ content.
 
 ## Prerequisites
 
@@ -22,7 +28,7 @@ customer answer.
 - npm
 - An OpenAI API key
 
-## Setup
+## Reviewer Quick Start
 
 ```bash
 git clone https://github.com/Islem-Rezzag/riverside-books-faq-assistant.git
@@ -30,12 +36,7 @@ cd riverside-books-faq-assistant
 npm install
 ```
 
-## Configure The API Key
-
-The LLM router requires an OpenAI API key at runtime.
-
-`.env.example` is a template. Copy it to a local `.env` file, then edit `.env`
-with your real key.
+Create a local `.env` file.
 
 Windows PowerShell:
 
@@ -50,14 +51,44 @@ macOS, Linux, or Git Bash:
 cp .env.example .env
 ```
 
-Set this inside `.env`:
+Set your API key inside `.env`:
 
 ```env
 OPENAI_API_KEY=your_real_key_here
 ```
 
-`.env` is local and private. Never commit `.env`, `.env.*`, API keys, or secret
-links. The repository should only track `.env.example` with placeholder values.
+`.env.example` is a template. `.env` is local/private and must never be
+committed.
+
+## Run The CLI
+
+```bash
+npm run dev
+```
+
+Expected startup:
+
+```text
+Riverside Books FAQ Assistant
+Using LLM router.
+```
+
+Type a question, then use `quit` or `exit` to leave.
+
+## Run The Web UI Demo
+
+```bash
+npm run ui:dev
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
+
+The Web UI Demo uses the same server-side LLM router. The browser never receives
+`OPENAI_API_KEY`.
 
 ## Commands That Do Not Require An API Key
 
@@ -89,51 +120,9 @@ npm run ui:dev
 - `npm run eval` runs the labelled eval set through the LLM router.
 - `npm run ui:dev` starts the Web UI Demo at `http://localhost:5173`.
 
-Expected `npm run dev` startup:
-
-```text
-Riverside Books FAQ Assistant
-Using LLM router.
-```
-
 The UI can load without a key, but asking a question will return a setup or
 technical issue response until the server-side router can access
 `OPENAI_API_KEY`.
-
-Compiled CLI after building:
-
-```bash
-npm start
-```
-
-## Web UI Demo
-
-The CLI is the core technical task solution. A lightweight Web UI Demo is
-included to make the routing behaviour easier to review.
-
-Start it with:
-
-```bash
-npm run ui:dev
-```
-
-Then open `http://localhost:5173`.
-
-You can also run the UI build check without an API key:
-
-```bash
-npm run ui:build
-```
-
-The UI uses a local Node server and calls `POST /api/ask`. The browser never
-calls OpenAI directly and never receives `OPENAI_API_KEY`; routing stays
-server-side through the same LLM router, and the final answer still comes from
-official FAQ content. The Web UI Demo is not a separate architecture.
-
-Eval results can vary slightly because the router uses an LLM.
-
-`LLM_TIMEOUT_MS` controls how long each LLM routing request can wait before the
-app returns a technical issue response.
 
 ## Final Routing Approach
 
@@ -144,28 +133,34 @@ The app uses an LLM router only:
 3. Ask for structured JSON containing `answerable`, `matchedFaqId`,
    `confidence`, and `reason`.
 4. Validate the structured decision locally.
-5. If the decision is valid and confident, print the matching FAQ answer from
+5. If the decision is valid and confident, return the matching FAQ answer from
    official FAQ content.
-6. If the decision is not valid, not confident, or says no match, print the safe
-   fallback.
+6. If the decision is not valid, not confident, or says no match, return the
+   safe fallback.
 
 Default model: `gpt-4o-mini`.
 
 ## Alternatives Considered
 
-- Keyword, fuzzy, and lexical matching were considered, but customer intent can
-  be indirect and similar FAQ categories can overlap.
-- Embeddings or semantic search were considered, but the FAQ set is small and
-  the task is routing to one approved FAQ answer.
-- The final design uses LLM routing plus local validation. If the router fails,
-  the app returns a clear technical issue instead of silently falling back to a
-  weaker matcher.
+The brief allowed several matching approaches, including embeddings, an LLM, or
+simpler keyword/fuzzy matching.
+
+I chose an LLM router because the task is mainly about mapping natural customer
+wording to one of 20 known FAQ intents. Embeddings are useful for similarity
+search, but nearest match is not always the same as answerability. Keyword and
+fuzzy matching are simple and cheap, but can become brittle when users phrase
+questions indirectly.
+
+The final design uses LLM routing plus local validation. If the router fails,
+the app returns a clear technical issue instead of silently falling back to a
+weaker matcher.
 
 ## Why No Generated Answers
 
 The model is used only to select a FAQ ID or no match. It is explicitly told not
-to answer the customer or invent policy. The final answer is always copied from
-the approved official FAQ content.
+to answer the customer or invent policy.
+
+The final answer is always copied from the approved official FAQ content.
 
 ## No-Good-Answer Handling
 
@@ -183,40 +178,74 @@ The app prints a technical issue message when:
 
 - `OPENAI_API_KEY` is missing at startup.
 - The OpenAI request fails after the configured retry count.
+- The OpenAI request times out after `LLM_TIMEOUT_MS`.
 - The router returns malformed structured output.
 - The router returns an FAQ ID that does not exist in the official FAQ content.
 
-## Troubleshooting
+## Evaluation
 
-- If you see `OpenAI API key is not configured`, check that `.env` exists in
-  the project root and contains `OPENAI_API_KEY=...`.
-- If API calls fail, check the key, model access, internet connection, and
-  `OPENAI_MODEL`.
-- If the Web UI loads but questions return a technical issue, the server-side
-  router likely cannot access the API key.
+The project includes a labelled eval set:
+
+- 40 paraphrased valid questions
+- 10 out-of-scope questions
+- 5 prompt-injection/security questions
+
+Validate the eval set without an API key:
+
+```bash
+npm run eval:validate
+```
+
+Run the eval through the LLM router:
+
+```bash
+npm run eval
+```
+
+Eval results can vary slightly because the router uses an LLM. The eval is
+intended to expose false positives, false negatives, and routing weaknesses, not
+to claim perfect accuracy.
 
 ## Trade-Offs
 
-- Accuracy: LLM routing can handle paraphrases better than simple lexical rules,
-  but it still needs validation and evaluation.
-- Latency: every question requires an API call.
-- Cost: routing uses paid model calls when the app is run.
+- Accuracy: LLM routing handles paraphrases better than brittle keyword rules,
+  but still needs validation and evals.
+- Latency: every routed question requires an API call.
+- Cost: routing uses paid model calls when the app is run. I used a small model
+  because this is a lightweight routing task, not a long-form reasoning task.
 - Hallucination risk: reduced by using the model only for routing and never for
   final answer generation.
-- API dependency: the chatbot needs `OPENAI_API_KEY`; without it, the app exits
-  with a setup message.
-- Timeout behavior: `LLM_TIMEOUT_MS` limits long-running API requests so the app
-  can return a clear technical issue instead of waiting indefinitely.
-- Prompt injection: the system prompt treats user text as untrusted, and local
-  validation rejects invalid routes.
+- API dependency: the chatbot requires `OPENAI_API_KEY` for runtime routing.
+- Timeout behaviour: `LLM_TIMEOUT_MS` prevents the UI or CLI waiting
+  indefinitely.
+- Prompt injection: obvious prompt-injection attempts are blocked before
+  routing, and invalid routes are rejected locally.
 
 ## Assumptions
 
-- The official FAQ content is trusted source data and should not be edited by
-  the app.
+- The official FAQ content is trusted source data.
 - FAQ IDs are stable and unique.
 - A safe refusal is better than a confident but unsupported answer.
-- A CLI is sufficient for the required task.
+- The CLI is the core technical task solution.
+- The Web UI Demo is a thin presentation layer over the same server-side router.
+
+## Troubleshooting
+
+### `OpenAI API key is not configured`
+
+Check that `.env` exists in the project root and contains:
+
+```env
+OPENAI_API_KEY=your_real_key_here
+```
+
+### API calls fail
+
+Check the API key, model access, internet connection, and `OPENAI_MODEL`.
+
+### Web UI loads but questions return a technical issue
+
+The UI is running, but the server-side router likely cannot access the API key.
 
 ## What I Would Do With More Time
 
@@ -224,7 +253,7 @@ The app prints a technical issue message when:
 - Add more adversarial prompt-injection examples.
 - Track false positives and false negatives over time.
 - Add duplicate FAQ ID validation.
-- Add lightweight logging for operational debugging without exposing secrets.
+- Add lightweight operational logging without exposing secrets.
 
 ## Example Questions
 
