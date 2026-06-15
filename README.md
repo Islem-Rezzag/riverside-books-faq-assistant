@@ -1,14 +1,16 @@
 # Riverside Books FAQ Assistant
 
-A TypeScript FAQ assistant for the Magnus Consulting AI Graduate technical task.
+A TypeScript FAQ assistant for the Magnus Consulting AI Graduate technical
+task.
 
-The required solution is a command-line chatbot. A lightweight Web UI Demo is
-also included to make the same routing behaviour easier to review.
+The required solution is a command-line chatbot.
+A lightweight Web UI Demo is also included to make the same routing behaviour
+easier to review.
 
 ## What This App Does
 
-This project implements a FAQ assistant for the fictional bookshop **Riverside
-Books**.
+This project implements a FAQ assistant for the fictional bookshop
+**Riverside Books**.
 
 For each customer question, the app:
 
@@ -19,8 +21,9 @@ For each customer question, the app:
 5. Returns the approved FAQ answer if the route is valid and confident.
 6. Returns a safe fallback if no FAQ is a good match.
 
-The LLM does **not** write the final customer answer. It only chooses a FAQ ID
-or no match. The final answer always comes from the official FAQ content.
+The LLM does **not** write the final customer answer.
+It only chooses a FAQ ID or no match.
+The final answer always comes from the official FAQ content.
 
 ## Prerequisites
 
@@ -59,8 +62,8 @@ Set your API key inside `.env`:
 OPENAI_API_KEY=your_real_key_here
 ```
 
-`.env.example` is a template. `.env` is local/private and must never be
-committed.
+`.env.example` is a template.
+`.env` is local/private and must never be committed.
 
 ## Run The CLI
 
@@ -89,8 +92,8 @@ Then open:
 http://localhost:5173
 ```
 
-The Web UI Demo uses the same server-side LLM router. The browser never receives
-`OPENAI_API_KEY`.
+The Web UI Demo uses the same server-side LLM router.
+The browser never receives `OPENAI_API_KEY`.
 
 ## Commands That Do Not Require An API Key
 
@@ -204,9 +207,9 @@ Run the eval through the LLM router:
 npm run eval
 ```
 
-Eval results can vary slightly because the router uses an LLM. The eval is
-intended to expose false positives, false negatives, and routing weaknesses, not
-to claim perfect accuracy.
+Eval results can vary slightly because the router uses an LLM.
+The eval is intended to expose false positives, false negatives, and routing
+weaknesses, not to claim perfect accuracy.
 
 ## Trade-Offs
 
