@@ -162,8 +162,8 @@ weaker matcher.
 
 ## Why No Generated Answers
 
-The model is used only to select a FAQ ID or no match. It is explicitly told not
-to answer the customer or invent policy.
+The model is used only to select a FAQ ID or no match.
+It is explicitly told not to answer the customer or invent policy.
 
 The final answer is always copied from the approved official FAQ content.
 
@@ -232,7 +232,8 @@ weaknesses, not to claim perfect accuracy.
 - FAQ IDs are stable and unique.
 - A safe refusal is better than a confident but unsupported answer.
 - The CLI is the core technical task solution.
-- The Web UI Demo is a thin presentation layer over the same server-side router.
+- The Web UI Demo is a thin presentation layer over the same server-side
+  router.
 
 ## Troubleshooting
 
